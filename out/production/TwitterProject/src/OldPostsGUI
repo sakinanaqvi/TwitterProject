@@ -1,0 +1,356 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.io.*;
+/**
+ * PostssGUI.java
+ *
+ * Creates the GUI for the posts page, handles
+ * deleting and editing posts, along with comments
+ *
+ * @author Group 3
+ * @version April 20, 2021
+ *
+ */
+
+public class PostsGUI extends JComponent {
+    private JLabel commenting;
+    private JLabel post;
+    private String username;
+
+    private BufferedReader reader;
+    private PrintWriter writer;
+
+    public PostsGUI(BufferedReader reader, PrintWriter writer, String username) {
+        this.reader = reader;
+        this.writer = writer;
+    }
+    public void run() {
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
+        mainPanel.setBackground(new Color(102, 102, 255));
+
+        JPanel generalView = new JPanel(); //creates the panel for everything to display
+        generalView.setLayout(new BoxLayout(generalView, BoxLayout.PAGE_AXIS));
+        generalView.setBackground(new Color(102, 102, 255));
+
+        JTextField newTitle = new JTextField("Enter Title Here",20);
+        JTextField newPost = new JTextField("Enter Post Here",50); // text field and post for the bottom panel
+        JButton postButton = new JButton("Post!");
+        postButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int x = 0;
+                int y = 20;
+                int height = 20;
+                int postX = 50;
+                int postY = 50;
+                int postHeight = 20;
+                int commentY = 80;
+                Date date = new Date();
+                Timestamp ts = new Timestamp(date.getTime());
+
+                post = new JLabel(newPost.getText()); //posts name and post on this panel
+                JLabel title = new JLabel(newTitle.getText());
+
+                JPanel anotherPanel = new JPanel();
+                anotherPanel.setLayout(null);
+                anotherPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+
+
+                JLabel name = new JLabel(username); //set this as the name of the account so that it can be seen
+                name.setBounds(x, 10, 100, 25);
+                
+
+                title.setBounds(0, 35, 175, postHeight);
+                title.setFont(new Font("Kai", Font.BOLD, 15));
+                title.setForeground(Color.WHITE);
+                title.setOpaque(false);
+
+                post.setBounds(postX, postY, 175, postHeight);
+                post.setFont(new Font("Kai", Font.PLAIN, 15));
+                post.setForeground(Color.WHITE);
+                post.setOpaque(false);
+
+                JLabel timestamp = new JLabel(ts.toString());
+                timestamp.setBounds(300, 15, 175, height);
+                timestamp.setFont(new Font("Kai", Font.ITALIC, 15));
+                timestamp.setForeground(Color.WHITE);
+
+                JFrame editFrame = new JFrame("Edit Post");
+                JButton editPost = new JButton("Edit Post");
+                editPost.setBounds(x + 115, commentY, 100, 25);
+                editPost.addActionListener(new ActionListener() { //edits and changes a post
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        JPanel editPanel = new JPanel();
+                        editPanel.setLayout(new BoxLayout(editPanel, BoxLayout.PAGE_AXIS));
+                        editPanel.setBackground((new  Color(102, 102, 255)));
+
+                        JLabel editPost = new JLabel("Edit your post!");
+                        editPost.setBounds(1000, 10, 100, 25);
+                        editPost.setFont(new Font("Kai", Font.BOLD | Font.ITALIC, 20));
+                        editPost.setForeground(Color.WHITE);
+
+                        editPanel.add(editPost);
+                        JTextField editText = new JTextField(30);
+                        JButton postEdit = new JButton("Edit Post");
+                        postEdit.addActionListener(new ActionListener() {
+
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                post.setText(editText.getText());
+                                if (editText.getText().equals("") || editText.getText().equals(" ")) { //checks for post validity
+                                    JOptionPane.showMessageDialog(null, "Please enter a valid edit", "Error", JOptionPane.ERROR_MESSAGE);
+
+                                } else {
+                                    post.setOpaque(false);
+                                    post.setBounds(postX, postY, 175, postHeight);
+                                    post.setFont(new Font("Kai", Font.ITALIC, 15));
+                                    post.setForeground(Color.WHITE);
+
+                                    mainPanel.revalidate();
+                                    mainPanel.repaint();
+
+                                    JOptionPane.showMessageDialog(null, "Successfully Edited", "Success!", JOptionPane.INFORMATION_MESSAGE);
+                                    editFrame.dispose();
+                                }
+                            }
+                        });
+                        JPanel bottomPanel = new JPanel();
+                        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
+                        bottomPanel.add(editText);
+                        bottomPanel.add(postEdit);
+
+
+                        editFrame.add(new JScrollPane(editPanel));
+                        editFrame.add(bottomPanel, BorderLayout.PAGE_END);
+
+                        editFrame.setDefaultCloseOperation(editFrame.DISPOSE_ON_CLOSE);
+                        editFrame.setLocationRelativeTo(null);
+                        editFrame.setSize(400,300);
+                        editFrame.setVisible(true);
+                    }
+
+                });
+                JButton deletePost = new JButton("Delete Post"); //deletes a post
+                deletePost.setBounds(x + 235, commentY, 100, 25);
+                deletePost.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        generalView.remove(anotherPanel);
+                        mainPanel.revalidate();
+                        mainPanel.repaint();
+                    }
+                });
+
+                JButton comment = new JButton("Comment!"); //comment button is set up
+                comment.setBounds(x, commentY, 100, 25);
+                comment.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) { //work on commenting
+                        JPanel maincPanel = new JPanel();
+                        maincPanel.setLayout(new BorderLayout());
+                        maincPanel.setBackground(new Color(102, 102, 255));
+
+                        JPanel commentGeneralView = new JPanel(); //creates the panel for everything to display
+                        commentGeneralView.setLayout(new BoxLayout(commentGeneralView, BoxLayout.PAGE_AXIS));
+                        commentGeneralView.setBackground(new Color(102, 102, 255));
+
+                        JTextField commentText = new JTextField(20);
+                        JButton commentButton = new JButton("Comment!");
+                        commentButton.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                int x = 0;
+                                int y = 20;
+                                int height = 20;
+                                int postX = 50;
+                                int postY = 50;
+                                int postHeight = 20;
+                                int commentY = 80;
+                                Date date1 = new Date();
+                                Timestamp timestamp = new Timestamp(date1.getTime());
+
+                                commenting = new JLabel(commentText.getText());
+
+                                JPanel commentPanel = new JPanel();
+                                commentPanel.setLayout(null);
+                                commentPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+
+                                JLabel commentName = new JLabel("username"); //set this as the name of the account so that it can be seen
+                                commentName.setBounds(x, y, 175, height);
+                                commentName.setFont(new Font("Kai", Font.ITALIC, 15));
+                                commentName.setForeground(Color.WHITE);
+
+                                commenting.setBounds(postX, postY, 175, postHeight);
+                                commenting.setFont(new Font("Kai", Font.PLAIN, 15));
+                                commenting.setForeground(Color.WHITE);
+                                commenting.setOpaque(false);
+
+                                JLabel commentTime = new JLabel(timestamp.toString());
+                                commentTime.setBounds(300, y, 175, height);
+                                commentTime.setFont(new Font("Kai", Font.ITALIC, 15));
+                                commentTime.setForeground(Color.WHITE);
+
+                                JFrame editCFrame = new JFrame("Edit Comment");
+                                JButton editCPost = new JButton("Edit Comment");
+                                editCPost.setBounds(x , commentY, 125, 25);
+                                editCPost.addActionListener(new ActionListener() { //edits and changes a post
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        JPanel commentEditPanel = new JPanel();
+                                        commentEditPanel.setLayout(new BoxLayout(commentEditPanel, BoxLayout.PAGE_AXIS));
+                                        commentEditPanel.setBackground((new Color(102, 102, 255)));
+
+                                        JLabel editComment = new JLabel("Edit your comment!");
+                                        editComment.setBounds(1000, 10, 100, 25);
+                                        editComment.setFont(new Font("Kai", Font.BOLD | Font.ITALIC, 20));
+                                        editComment.setForeground(Color.WHITE);
+
+                                        commentEditPanel.add(editComment);
+                                        JTextField editCommentText = new JTextField(30);
+                                        JButton postCommentEdit = new JButton("Edit Comment");
+                                        postCommentEdit.addActionListener(new ActionListener() {
+
+                                            @Override
+                                            public void actionPerformed(ActionEvent e) {
+                                                commenting.setText(editCommentText.getText());
+                                                //posts.setContext(post.getText());
+                                                if (editCommentText.getText().equals("") || editCommentText.getText().equals(" ")) { //checks for post validity
+                                                    JOptionPane.showMessageDialog(null, "Please enter a valid edit", "Error", JOptionPane.ERROR_MESSAGE);
+
+                                                } else {
+                                                    commenting.setOpaque(false);
+                                                    commenting.setBounds(postX, postY, 175, postHeight);
+                                                    commenting.setFont(new Font("Kai", Font.ITALIC, 15));
+                                                    commenting.setForeground(Color.WHITE);
+
+                                                    maincPanel.revalidate();
+                                                    maincPanel.repaint();
+
+                                                    JOptionPane.showMessageDialog(null, "Successfully Edited", "Success!", JOptionPane.INFORMATION_MESSAGE);
+                                                    editCFrame.dispose();
+                                                }
+                                            }
+                                        });
+                                        JPanel bottomPanel = new JPanel();
+                                        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
+                                        bottomPanel.add(editCommentText);
+                                        bottomPanel.add(postCommentEdit);
+
+
+                                        editCFrame.add(new JScrollPane(commentEditPanel));
+                                        editCFrame.add(bottomPanel, BorderLayout.PAGE_END);
+
+                                        editCFrame.setDefaultCloseOperation(editCFrame.DISPOSE_ON_CLOSE);
+                                        editCFrame.setLocationRelativeTo(null);
+                                        editCFrame.setSize(400, 300);
+                                        editCFrame.setVisible(true);
+                                    }
+
+                                });
+                                JButton deleteCPost = new JButton("Delete Comment"); //deletes a post
+                                deleteCPost.setBounds(x + 235, commentY, 130, 25);
+                                deleteCPost.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        //posts.equals(posts);
+                                        commentGeneralView.remove(commentPanel);
+                                        maincPanel.revalidate();
+                                        maincPanel.repaint();
+                                    }
+                                });
+                                if (commenting.getText().equals("") || commenting.getText().equals(" ")) { //checks for post validity
+                                    JOptionPane.showMessageDialog(null, "Please enter a valid post", "Error", JOptionPane.ERROR_MESSAGE);
+                                } else {
+
+                                    commentPanel.add(commentName);
+                                    commentPanel.add(commenting);
+                                    commentPanel.add(editCPost);
+                                    commentPanel.add(deleteCPost);
+                                    commentPanel.add(commentTime);
+                                    commentPanel.setPreferredSize(new Dimension(400, 200));
+
+                                    commentPanel.setBackground(new Color(102, 102, 255));
+
+                                    commentGeneralView.add(commentPanel, 0);
+                                    maincPanel.add(commentGeneralView, 0);
+                                    commentText.setText("");
+                                    commentGeneralView.revalidate();
+                                }
+
+                            }
+                        });
+
+                        JPanel postingPanel = new JPanel();
+                        postingPanel.setLayout(new BoxLayout(postingPanel, BoxLayout.LINE_AXIS));
+                        postingPanel.add(commentText);
+                        postingPanel.add(commentButton);
+
+                        JFrame commentFrame = new JFrame("Comment Something!"); //setting up the frame
+                        JScrollPane scroller = new JScrollPane(maincPanel);
+                        scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+                        commentFrame.add(scroller);
+                        JScrollPane anotherScroller = new JScrollPane(postingPanel);
+                        commentFrame.add(anotherScroller, BorderLayout.PAGE_END);
+                        commentFrame.setSize(600, 400);
+                        commentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        commentFrame.setLocationRelativeTo(null);
+                        commentFrame.setVisible(true);
+                    }
+                });
+
+                if (post.getText().equals("") || post.getText().equals(" ")) { //checks for post validity
+                    JOptionPane.showMessageDialog(null, "Please enter a valid post", "Error", JOptionPane.ERROR_MESSAGE);
+
+                } else if (title.getText().equals("") || title.getText().equals(" ")) { //checks for post validity
+                    JOptionPane.showMessageDialog(null, "Please enter a valid title", "Error", JOptionPane.ERROR_MESSAGE);
+
+                } else {
+
+                    anotherPanel.add(name);
+                    anotherPanel.add(title);
+                    anotherPanel.add(post);
+                    anotherPanel.add(editPost);
+                    anotherPanel.add(deletePost);
+                    anotherPanel.add(comment);
+                    anotherPanel.add(timestamp);
+                    anotherPanel.setPreferredSize(new Dimension(400, 200));
+
+                    anotherPanel.setBackground(new Color(102, 102, 255));
+
+                    generalView.add(anotherPanel, 0);
+                    mainPanel.add(generalView, 0);
+                    newPost.setText("Enter Post Here");
+                    newTitle.setText("Enter Title Here");
+                    generalView.revalidate();
+                }
+
+            }
+        });
+
+        JPanel postingPanel = new JPanel();
+        postingPanel.setLayout(new BoxLayout(postingPanel, BoxLayout.LINE_AXIS));
+        postingPanel.add(newTitle);
+        postingPanel.add(newPost);
+        postingPanel.add(postButton);
+
+        JFrame mainFrame = new JFrame("Post Something!"); //setting up the frame
+        JScrollPane scroller = new JScrollPane(mainPanel);
+        scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        mainFrame.add(scroller);
+        JScrollPane anotherScroller = new JScrollPane(postingPanel);
+        mainFrame.add(anotherScroller, BorderLayout.PAGE_END);
+        mainFrame.setSize(800, 600);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setLocationRelativeTo(null);
+        mainFrame.setVisible(true);
+
+    }
+
+}
